@@ -10,4 +10,7 @@ pkgs.mkShell {
     python3
     stdenv.cc
   ];
+  shellHook = ''
+    export CXXFLAGS="-std=c++20"
+  '';
 }

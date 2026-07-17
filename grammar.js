@@ -108,13 +108,9 @@ export default grammar({
     [$._type, $.generic_type, $._expression],
     [$._type, $.generic_type],
     [$._expression, $.assignment_left_hand_side],
-    [$.pointer_type, $.sizeof_expression],
     [$.parameter, $.instance_variable],
-    [$.pointer_type, $.variable_declaration],
     [$._type, $._expression],
     [$.generic_type, $._expression],
-    [$.pointer_type, $.array_literal],
-    [$.pointer_type, $.hash_literal],
     [$.parameter, $.variable_declaration],
     [$.variable_declaration],
     [$.conditional_statement, $.inline_modifier, $.call_expression],
@@ -247,7 +243,7 @@ export default grammar({
     _type: ($) => choice($.type_identifier, $.pointer_type, $.generic_type),
 
     /** Type* */
-    pointer_type: ($) => seq($._type, "*"),
+    pointer_type: ($) => prec(15, seq($._type, "*")),
 
     /** Type[ Type, Type ] */
     generic_type: ($) =>
@@ -296,7 +292,8 @@ export default grammar({
 
     symbol_literal: ($) => seq(":", $.identifier),
 
-    raise_expression: ($) => prec.left(seq("raise", $._expression)),
+    raise_expression: ($) =>
+      prec.right(PREC.OR + 1, seq("raise", $._expression)),
 
     unary_expression: ($) =>
       prec(PREC.UNARY, seq(choice("*", "-", "!", "~", "&"), $._expression)),

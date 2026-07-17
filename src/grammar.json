@@ -680,17 +680,21 @@
       ]
     },
     "pointer_type": {
-      "type": "SEQ",
-      "members": [
-        {
-          "type": "SYMBOL",
-          "name": "_type"
-        },
-        {
-          "type": "STRING",
-          "value": "*"
-        }
-      ]
+      "type": "PREC",
+      "value": 15,
+      "content": {
+        "type": "SEQ",
+        "members": [
+          {
+            "type": "SYMBOL",
+            "name": "_type"
+          },
+          {
+            "type": "STRING",
+            "value": "*"
+          }
+        ]
+      }
     },
     "generic_type": {
       "type": "SEQ",
@@ -929,8 +933,8 @@
       ]
     },
     "raise_expression": {
-      "type": "PREC_LEFT",
-      "value": 0,
+      "type": "PREC_RIGHT",
+      "value": 3,
       "content": {
         "type": "SEQ",
         "members": [
@@ -2390,16 +2394,8 @@
       "assignment_left_hand_side"
     ],
     [
-      "pointer_type",
-      "sizeof_expression"
-    ],
-    [
       "parameter",
       "instance_variable"
-    ],
-    [
-      "pointer_type",
-      "variable_declaration"
     ],
     [
       "_type",
@@ -2408,14 +2404,6 @@
     [
       "generic_type",
       "_expression"
-    ],
-    [
-      "pointer_type",
-      "array_literal"
-    ],
-    [
-      "pointer_type",
-      "hash_literal"
     ],
     [
       "parameter",

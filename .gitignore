@@ -1,3 +1,8 @@
 .direnv
 result
 node_modules
+libtree-sitter-volt.a
+libtree-sitter-volt.so
+tree-sitter-volt.pc
+compile_commands.json
+*.o

@@ -48,20 +48,21 @@ const OPERATORS = {
 
 const PREC = {
   ASSIGNMENT: 0,
-  CONDITIONAL: 1,
-  OR: 2,
-  AND: 3,
-  COMPARE: 4,
-  RELATIONAL: 5,
-  BITWISE_OR: 6,
-  BITWISE_AND: 7,
-  SHIFT: 8,
-  ADDITIVE: 9,
-  MULTIPLICATIVE: 10,
-  EXPONENTIAL: 11,
-  UNARY: 12,
-  MEMBER: 13,
   CALL_NO_PARENS: 1,
+  CONDITIONAL: 2,
+  INLINE_CONDITIONAL: 2,
+  OR: 3,
+  AND: 4,
+  COMPARE: 5,
+  RELATIONAL: 6,
+  BITWISE_OR: 7,
+  BITWISE_AND: 8,
+  SHIFT: 9,
+  ADDITIVE: 10,
+  MULTIPLICATIVE: 11,
+  EXPONENTIAL: 12,
+  UNARY: 13,
+  MEMBER: 14,
 };
 
 //@ts-ignore
@@ -88,21 +89,35 @@ export default grammar({
     [$._type, $.generic_type, $.expression],
     [$._type, $.generic_type],
     [$.expression, $.assignment_left_hand_side],
+    [$._simple_expression, $.assignment_left_hand_side],
     [$.parameter, $.instance_variable],
     [$._type, $.expression],
+    [$._type, $._simple_expression],
     [$.generic_type, $.expression],
     [$.parameter, $.variable_declaration],
+    [$._simple_expression, $.variable_declaration],
     [$.variable_declaration],
     [$.conditional_expression, $.inline_modifier],
     [$.conditional_expression, $.inline_modifier, $.typeof_expression],
     [$.conditional_expression, $.inline_modifier, $.return_expression],
     [$.inline_modifier],
+    [$.inline_modifier, $.conditional_statement],
+    [$.inline_modifier, $.call_expression],
+    [$.unary_expression, $.conditional_expression, $.inline_modifier],
+    [$.raise_expression, $.conditional_expression, $.inline_modifier],
+    [$.binary_expression, $.conditional_expression, $.inline_modifier],
+    [$.inline_modifier, $.typeof_expression],
+    [$.inline_modifier, $.variable_declaration],
     [$.conditional_expression, $.inline_modifier, $.assignment],
     [$.conditional_expression, $.inline_modifier, $.variable_declaration],
     [$.expression, $.symbol_literal],
+    [$._simple_expression, $.symbol_literal],
+    [$.ternary_expression, $.symbol_literal],
+    [$.ternary_expression, $.call_expression],
     [$.symbol_literal, $.assignment_left_hand_side],
     [$.conditional_expression, $.inline_modifier, $.call_expression],
     [$.call_expression, $.parenthesized_expression],
+    [$._simple_expression, $.call_expression],
     [$.call_expression, $.typeof_expression],
     [$.call_expression],
     [$.variable_declaration, $.call_expression],
@@ -136,10 +151,12 @@ export default grammar({
         optional($._terminator)
       ),
 
+    _statement: ($) => choice($.expression, $.conditional_statement),
+
     block: ($) =>
       seq(
-        $.expression,
-        repeat(seq($._terminator, $.expression)),
+        $._statement,
+        repeat(seq($._terminator, $._statement)),
         optional($._terminator)
       ),
 
@@ -248,7 +265,7 @@ export default grammar({
     type_parameter_list: ($) => seq("[", __comma_sep1($.type_identifier), "]"),
 
     /** ( ..., ... ) */
-    parameter_list: ($) => seq("(", __comma_sep($.parameter), ")"),
+    parameter_list: ($) => seq("(", optional(__comma_sep($.parameter)), ")"),
 
     /** var : Type */
     parameter: ($) =>
@@ -267,10 +284,20 @@ export default grammar({
 
     /** Type[ Type, Type ] */
     generic_type: ($) =>
-      seq($.type_identifier, "[", __comma_sep1(choice($._type, $.number)), "]"),
+      prec(14, seq($.type_identifier, "[", __comma_sep1(choice($._type, $.number)), "]")),
 
     /** expression */
     expression: ($) =>
+      choice(
+        $._simple_expression,
+        $.inline_modifier,
+        $.assignment,
+        $.variable_declaration,
+        $.return_expression,
+        $.raise_expression,
+      ),
+
+    _simple_expression: ($) =>
       choice(
         $.identifier,
         $.instance_variable,
@@ -284,19 +311,14 @@ export default grammar({
         $.annotation,
         $.unary_expression,
         $.binary_expression,
-        $.conditional_statement,
         $.conditional_expression,
-        $.inline_modifier,
-        $.assignment,
-        $.variable_declaration,
+        $.ternary_expression,
         $.call_expression,
         $.member_expression,
         $.index_expression,
         $.generic_type,
         $.sizeof_expression,
         $.typeof_expression,
-        $.return_expression,
-        $.raise_expression,
         $.parenthesized_expression,
         $.array_literal,
         $.hash_literal,
@@ -310,7 +332,7 @@ export default grammar({
 
     self_expression: ($) => "self",
 
-    symbol_literal: ($) => seq(":", $.identifier),
+    symbol_literal: ($) => /:[a-z_][a-zA-Z0-9_]*[!?]?=?/,
 
     raise_expression: ($) =>
       prec.right(PREC.OR + 1, seq("raise", $.expression)),
@@ -384,18 +406,21 @@ export default grammar({
         ),
       ),
 
+    ternary_expression: ($) =>
+      prec.dynamic(1, prec.right(
+        PREC.CONDITIONAL,
+        seq($.expression, "?", $.expression, ":", $.expression)
+      )),
+
     conditional_expression: ($) =>
       prec.right(
         PREC.CONDITIONAL,
-        choice(
-          seq($.expression, "?", $.expression, ":", $.expression),
-          seq($.expression, "if", $.expression, "else", $.expression),
-        ),
+        seq($.expression, "if", $.expression, "else", $.expression)
       ),
 
     /** expression if/unless expression */
     inline_modifier: ($) =>
-      prec.left(PREC.CONDITIONAL, seq($.expression, choice("if", "unless"), $.expression)),
+      prec.dynamic(1, seq($.expression, choice("if", "unless"), $.expression)),
 
     assignment_left_hand_side: ($) =>
       choice(
@@ -449,7 +474,7 @@ export default grammar({
           PREC.CALL_NO_PARENS,
           seq(
             choice($.identifier, $.type_identifier, $.member_expression),
-            __comma_sep($.expression),
+            __comma_sep($._simple_expression),
           ),
         ),
       ),
@@ -516,7 +541,7 @@ export default grammar({
       ),
 
     /** identifier */
-    identifier: ($) => /[a-z_][a-zA-Z0-9_]*\??=?/,
+    identifier: ($) => /[a-z_][a-zA-Z0-9_]*[!?]?=?/,
 
     /** Type */
     type_identifier: ($) => /[A-Z][a-zA-Z0-9_]*/,

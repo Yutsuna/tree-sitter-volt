@@ -6,3 +6,4 @@ libtree-sitter-volt.so
 tree-sitter-volt.pc
 compile_commands.json
 *.o
+build/

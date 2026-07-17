@@ -102,15 +102,13 @@ export default grammar({
   word: ($) => $.identifier,
 
   conflicts: ($) => [
-    [$.method_definition, $.call_expression],
-    [$.conditional_statement, $.call_expression],
     [$._expression, $.variable_declaration],
     [$.class_definition, $.include_statement],
     [$.struct_definition, $.include_statement],
+    [$._type, $.generic_type, $._expression],
     [$._type, $.generic_type],
     [$._expression, $.assignment_left_hand_side],
     [$.pointer_type, $.sizeof_expression],
-    [$.call_expression, $.typeof_expression],
     [$.parameter, $.instance_variable],
     [$.pointer_type, $.variable_declaration],
     [$._type, $._expression],
@@ -119,13 +117,9 @@ export default grammar({
     [$.pointer_type, $.hash_literal],
     [$.parameter, $.variable_declaration],
     [$.variable_declaration],
+    [$.conditional_statement, $.inline_modifier, $.call_expression],
     [$.conditional_statement, $.inline_modifier, $.index_expression],
     [$.binary_expression, $.conditional_statement, $.inline_modifier],
-    [$._expression, $.symbol_literal],
-    [$.symbol_literal, $.assignment_left_hand_side],
-    [$.call_expression],
-    [$.call_expression, $.parenthesized_expression],
-    [$.variable_declaration, $.call_expression],
   ],
 
   rules: {
@@ -412,15 +406,9 @@ export default grammar({
 
     /** expression( ... ) */
     call_expression: ($) =>
-      choice(
+      prec.left(
+        PREC.MEMBER,
         seq($._expression, "(", optional(__comma_sep($._expression)), ")"),
-        prec.left(
-          PREC.CALL_NO_PARENS,
-          seq(
-            choice($.identifier, $.type_identifier, $.member_expression),
-            __comma_sep($._expression),
-          ),
-        ),
       ),
 
     member_expression: ($) =>

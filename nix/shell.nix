@@ -7,5 +7,7 @@ pkgs.mkShell {
   nativeBuildInputs = with pkgs; [
     tree-sitter
     nodejs
+    python3
+    stdenv.cc
   ];
 }

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "volt",
+      "camelcase": "Volt",
+      "title": "Volt",
+      "scope": "source.volt",
+      "file-types": [
+        "vl",
+        "volt",
+        "vlx"
+      ],
+      "injection-regex": "^volt$",
+      "class-name": "TreeSitterVolt"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Volt programming language syntax highlighter",
+    "authors": [
+      {
+        "name": "Yutsuna",
+        "url": ""
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-volt",
+      "funding": ""
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "java": false,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}

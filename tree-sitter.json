@@ -12,7 +12,10 @@
         "vlx"
       ],
       "injection-regex": "^volt$",
-      "class-name": "TreeSitterVolt"
+      "class-name": "TreeSitterVolt",
+      "highlights": "queries/highlights.scm",
+      "locals": "queries/locals.scm",
+      "tags": "queries/tags.scm"
     }
   ],
   "metadata": {

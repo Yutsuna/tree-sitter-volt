@@ -13,8 +13,28 @@
 
 const OPERATORS = {
   identifiers: [
-    "[]", "[]=", "<", "<=", ">", ">=", "==", "<=>",
-    "+", "-", "*", "/", "%", "**", "//", "&&", "||", "&", "|", "^", "<<", ">>"
+    "[]",
+    "[]=",
+    "<",
+    "<=",
+    ">",
+    ">=",
+    "==",
+    "<=>",
+    "+",
+    "-",
+    "*",
+    "/",
+    "%",
+    "**",
+    "//",
+    "&&",
+    "||",
+    "&",
+    "|",
+    "^",
+    "<<",
+    ">>",
   ],
 
   binary_expressions: [
@@ -100,6 +120,9 @@ export default grammar({
     [$.conditional_expression, $.inline_modifier],
     [$.conditional_expression, $.inline_modifier, $.typeof_expression],
     [$.conditional_expression, $.inline_modifier, $.return_expression],
+    [$.conditional_expression, $.inline_modifier, $.yield_expression],
+    [$.yield_expression, $.inline_modifier],
+    [$.block_argument, $.hash_literal],
     [$.inline_modifier],
     [$.inline_modifier, $.conditional_statement],
     [$.inline_modifier, $.call_expression],
@@ -148,7 +171,7 @@ export default grammar({
       seq(
         $._definition,
         repeat(seq($._terminator, $._definition)),
-        optional($._terminator)
+        optional($._terminator),
       ),
 
     _statement: ($) => choice($.expression, $.conditional_statement),
@@ -157,7 +180,7 @@ export default grammar({
       seq(
         $._statement,
         repeat(seq($._terminator, $._statement)),
-        optional($._terminator)
+        optional($._terminator),
       ),
 
     /** class Name ... end */
@@ -167,10 +190,7 @@ export default grammar({
         field("name", $.type_identifier),
         optional($.type_parameter_list),
         optional(seq("include", $.type_identifier)),
-        choice(
-          seq($._terminator, optional($.definitions), "end"),
-          "end"
-        )
+        choice(seq($._terminator, optional($.definitions), "end"), "end"),
       ),
 
     /** struct Name ... end */
@@ -180,10 +200,7 @@ export default grammar({
         field("name", $.type_identifier),
         optional($.type_parameter_list),
         optional(seq("include", $.type_identifier)),
-        choice(
-          seq($._terminator, optional($.definitions), "end"),
-          "end"
-        )
+        choice(seq($._terminator, optional($.definitions), "end"), "end"),
       ),
 
     /** module Name ... end */
@@ -192,10 +209,7 @@ export default grammar({
         "module",
         field("name", $.type_identifier),
         optional($.type_parameter_list),
-        choice(
-          seq($._terminator, optional($.definitions), "end"),
-          "end"
-        )
+        choice(seq($._terminator, optional($.definitions), "end"), "end"),
       ),
 
     /** mixin Name ... end */
@@ -204,10 +218,7 @@ export default grammar({
         "mixin",
         field("name", $.type_identifier),
         optional($.type_parameter_list),
-        choice(
-          seq($._terminator, optional($.definitions), "end"),
-          "end"
-        )
+        choice(seq($._terminator, optional($.definitions), "end"), "end"),
       ),
 
     /** def name( ... ) -> Type ... end */
@@ -225,10 +236,7 @@ export default grammar({
         ),
         optional($.parameter_list),
         optional(seq("->", field("return_type", $._type))),
-        choice(
-          seq($._terminator, optional($.block), "end"),
-          "end"
-        )
+        choice(seq($._terminator, optional($.block), "end"), "end"),
       ),
 
     /** abstract def name( ... ) -> Type */
@@ -237,10 +245,7 @@ export default grammar({
         optional($.visibility_modifier),
         "abstract",
         "def",
-        field(
-          "name",
-          choice($.identifier, $.operator_identifier),
-        ),
+        field("name", choice($.identifier, $.operator_identifier)),
         optional($.parameter_list),
         optional(seq("->", field("return_type", $._type))),
       ),
@@ -270,21 +275,33 @@ export default grammar({
     /** var : Type */
     parameter: ($) =>
       seq(
-        field("name", choice($.identifier, seq("@", $.identifier))),
+        field("name", choice($.identifier, seq("@", $.identifier), seq("&", $.identifier))),
         ":",
         field("type", $._type),
         optional(seq("=", $.expression)),
       ),
 
     /** type */
-    _type: ($) => choice($.type_identifier, $.pointer_type, $.generic_type),
+    _type: ($) => choice($.type_identifier, $.pointer_type, $.generic_type, $.function_type, $.parenthesized_type),
+
+    parenthesized_type: ($) => seq("(", __comma_sep1($._type), ")"),
+
+    function_type: ($) => prec.right(1, seq(choice($.type_identifier, $.pointer_type, $.generic_type, $.parenthesized_type), "->", $._type)),
 
     /** Type* */
     pointer_type: ($) => prec(15, seq($._type, "*")),
 
     /** Type[ Type, Type ] */
     generic_type: ($) =>
-      prec(14, seq($.type_identifier, "[", __comma_sep1(choice($._type, $.number)), "]")),
+      prec(
+        14,
+        seq(
+          $.type_identifier,
+          "[",
+          __comma_sep1(choice($._type, $.number)),
+          "]",
+        ),
+      ),
 
     /** expression */
     expression: ($) =>
@@ -322,6 +339,8 @@ export default grammar({
         $.parenthesized_expression,
         $.array_literal,
         $.hash_literal,
+        $.regex_literal,
+        $.yield_expression,
       ),
 
     instance_variable: ($) => seq("@", $.identifier),
@@ -332,7 +351,23 @@ export default grammar({
 
     self_expression: ($) => "self",
 
+    yield_expression: ($) =>
+      prec.right(
+        PREC.CALL_NO_PARENS,
+        seq("yield", optional(__comma_sep($.expression)))
+      ),
+
     symbol_literal: ($) => /:[a-z_][a-zA-Z0-9_]*[!?]?=?/,
+
+    regex_literal: ($) =>
+      token(
+        seq(
+          "/",
+          repeat(choice(/[^/\\\n]/, seq("\\", /./))),
+          "/",
+          optional(/[a-z]+/),
+        ),
+      ),
 
     raise_expression: ($) =>
       prec.right(PREC.OR + 1, seq("raise", $.expression)),
@@ -369,7 +404,10 @@ export default grammar({
           PREC.COMPARE,
           seq($.expression, choice("==", "!=", "<=>"), $.expression),
         ),
-        prec.left(PREC.AND, seq($.expression, choice("&&", "and"), $.expression)),
+        prec.left(
+          PREC.AND,
+          seq($.expression, choice("&&", "and"), $.expression),
+        ),
         prec.left(PREC.OR, seq($.expression, choice("||", "or"), $.expression)),
       ),
 
@@ -378,10 +416,7 @@ export default grammar({
       seq(
         choice("if", "while", "unless"),
         field("condition", $.expression),
-        choice(
-          seq($._terminator, optional($.block)),
-          optional($._terminator)
-        ),
+        choice(seq($._terminator, optional($.block)), optional($._terminator)),
         repeat($.elsif_clause),
         optional($.else_clause),
         "end",
@@ -391,31 +426,28 @@ export default grammar({
       seq(
         "elsif",
         field("condition", $.expression),
-        choice(
-          seq($._terminator, optional($.block)),
-          optional($._terminator)
-        ),
+        choice(seq($._terminator, optional($.block)), optional($._terminator)),
       ),
 
     else_clause: ($) =>
       seq(
         "else",
-        choice(
-          seq($._terminator, optional($.block)),
-          optional($._terminator)
-        ),
+        choice(seq($._terminator, optional($.block)), optional($._terminator)),
       ),
 
     ternary_expression: ($) =>
-      prec.dynamic(1, prec.right(
-        PREC.CONDITIONAL,
-        seq($.expression, "?", $.expression, ":", $.expression)
-      )),
+      prec.dynamic(
+        1,
+        prec.right(
+          PREC.CONDITIONAL,
+          seq($.expression, "?", $.expression, ":", $.expression),
+        ),
+      ),
 
     conditional_expression: ($) =>
       prec.right(
         PREC.CONDITIONAL,
-        seq($.expression, "if", $.expression, "else", $.expression)
+        seq($.expression, "if", $.expression, "else", $.expression),
       ),
 
     /** expression if/unless expression */
@@ -454,6 +486,14 @@ export default grammar({
         optional(seq("=", $.expression)),
       ),
 
+    block_parameters: ($) => seq("|", __comma_sep($.identifier), "|"),
+
+    block_argument: ($) =>
+      choice(
+        seq("do", optional($.block_parameters), choice(seq($._terminator, optional($.block)), optional($.block)), "end"),
+        seq("{", optional($.block_parameters), choice(seq(optional($._terminator), optional($.block)), optional($._terminator)), "}"),
+      ),
+
     /** expression( ... ) */
     call_expression: ($) =>
       choice(
@@ -469,21 +509,24 @@ export default grammar({
           "(",
           optional(__comma_sep($.expression)),
           ")",
+          optional($.block_argument),
         ),
         prec.left(
           PREC.CALL_NO_PARENS,
           seq(
             choice($.identifier, $.type_identifier, $.member_expression),
             __comma_sep($._simple_expression),
+            optional($.block_argument),
           ),
+        ),
+        seq(
+          choice($.identifier, $.type_identifier, $.member_expression),
+          $.block_argument,
         ),
       ),
 
     member_expression: ($) =>
-      prec.left(
-        PREC.MEMBER,
-        seq($.expression, ".", $.identifier),
-      ),
+      prec.left(PREC.MEMBER, seq($.expression, ".", $.identifier)),
 
     index_expression: ($) =>
       prec.left(
@@ -491,32 +534,13 @@ export default grammar({
         seq($.expression, "[", __comma_sep1($.expression), "]"),
       ),
 
-    sizeof_expression: ($) =>
-      seq(
-        "sizeof",
-        $._type,
-      ),
+    sizeof_expression: ($) => seq("sizeof", $._type),
 
-    typeof_expression: ($) =>
-      seq(
-        "typeof",
-        $.expression,
-      ),
+    typeof_expression: ($) => seq("typeof", $.expression),
 
-    return_expression: ($) =>
-      prec.left(
-        seq(
-          "return",
-          optional($.expression),
-        ),
-      ),
+    return_expression: ($) => prec.left(seq("return", optional($.expression))),
 
-    parenthesized_expression: ($) =>
-      seq(
-        "(",
-        $.expression,
-        ")",
-      ),
+    parenthesized_expression: ($) => seq("(", $.expression, ")"),
 
     array_literal: ($) =>
       seq(
@@ -565,13 +589,7 @@ export default grammar({
     string: ($) =>
       seq(
         '"',
-        repeat(
-          choice(
-            $.string_content,
-            $.interpolation,
-            $.escape_sequence,
-          )
-        ),
+        repeat(choice($.string_content, $.interpolation, $.escape_sequence)),
         '"',
       ),
 

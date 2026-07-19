@@ -3,8 +3,22 @@
 
 (identifier) @variable
 
-((identifier) @function.method
- (#is-not? local))
+; Types
+;------------------------------------------------------------------------------
+
+(type_identifier) @type
+
+(class_definition
+  name: (type_identifier) @constructor)
+
+(struct_definition
+  name: (type_identifier) @constructor)
+
+(module_definition
+  name: (type_identifier) @constructor)
+
+(mixin_definition
+  name: (type_identifier) @constructor)
 
 ; Keywords
 ;------------------------------------------------------------------------------
@@ -38,11 +52,6 @@
 
 (visibility_modifier) @keyword
 
-; Types
-;------------------------------------------------------------------------------
-
-(type_identifier) @constructor
-
 ; Function calls
 ;------------------------------------------------------------------------------
 
@@ -51,7 +60,7 @@
     (identifier) @function.method))
 
 (call_expression
-  (identifier) @function.method)
+  (identifier) @function)
 
 (call_expression
   (type_identifier) @constructor)
@@ -60,18 +69,18 @@
 ;------------------------------------------------------------------------------
 
 (method_definition
-  name: (identifier) @function.method)
+  name: (identifier) @function)
 
 (method_definition
-  name: (operator_identifier) @function.method)
+  name: (operator_identifier) @function)
 
 (abstract_method_definition
-  name: (identifier) @function.method)
+  name: (identifier) @function)
 
 (abstract_method_definition
-  name: (operator_identifier) @function.method)
+  name: (operator_identifier) @function)
 
-; Identifiers
+; Identifiers & variables
 ;------------------------------------------------------------------------------
 
 (instance_variable) @property
@@ -97,6 +106,8 @@
 (string_content) @string
 
 (symbol_literal) @string.special.symbol
+
+(regex_literal) @string.regex
 
 (escape_sequence) @escape
 

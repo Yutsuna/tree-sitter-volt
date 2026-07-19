@@ -82,7 +82,7 @@
 ; Variables & Instance variables
 ;------------------------------------------------------------------------------
 
-(instance_variable) @variable.other.member
+(instance_variable) @variable.builtin
 
 (self_expression) @variable.builtin
 

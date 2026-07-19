@@ -855,21 +855,6 @@
     }
   },
   {
-    "type": "instance_variable",
-    "named": true,
-    "fields": {},
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "identifier",
-          "named": true
-        }
-      ]
-    }
-  },
-  {
     "type": "interpolation",
     "named": true,
     "fields": {},
@@ -1106,11 +1091,11 @@
             "named": false
           },
           {
-            "type": "@",
-            "named": false
+            "type": "identifier",
+            "named": true
           },
           {
-            "type": "identifier",
+            "type": "instance_variable",
             "named": true
           }
         ]
@@ -1682,10 +1667,6 @@
     "named": false
   },
   {
-    "type": "@",
-    "named": false
-  },
-  {
     "type": "@[",
     "named": false
   },
@@ -1773,6 +1754,10 @@
   {
     "type": "include",
     "named": false
+  },
+  {
+    "type": "instance_variable",
+    "named": true
   },
   {
     "type": "mixin",

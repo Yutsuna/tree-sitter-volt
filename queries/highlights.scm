@@ -9,16 +9,16 @@
 (type_identifier) @type
 
 (class_definition
-  name: (type_identifier) @constructor)
+  name: (type_identifier) @type)
 
 (struct_definition
-  name: (type_identifier) @constructor)
+  name: (type_identifier) @type)
 
 (module_definition
-  name: (type_identifier) @constructor)
+  name: (type_identifier) @type)
 
 (mixin_definition
-  name: (type_identifier) @constructor)
+  name: (type_identifier) @type)
 
 ; Keywords
 ;------------------------------------------------------------------------------
@@ -28,6 +28,7 @@
   "and"
   "class"
   "def"
+  "do"
   "else"
   "elsif"
   "end"
@@ -45,6 +46,7 @@
   "typeof"
   "unless"
   "while"
+  "yield"
 ] @keyword
 
 ((identifier) @keyword
@@ -62,9 +64,6 @@
 (call_expression
   (identifier) @function)
 
-(call_expression
-  (type_identifier) @constructor)
-
 ; Function definitions
 ;------------------------------------------------------------------------------
 
@@ -80,10 +79,10 @@
 (abstract_method_definition
   name: (operator_identifier) @function)
 
-; Identifiers & variables
+; Variables & Instance variables
 ;------------------------------------------------------------------------------
 
-(instance_variable) @property
+(instance_variable) @variable.other.member
 
 (self_expression) @variable.builtin
 

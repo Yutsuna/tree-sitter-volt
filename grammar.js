@@ -275,7 +275,7 @@ export default grammar({
     /** var : Type */
     parameter: ($) =>
       seq(
-        field("name", choice($.identifier, seq("@", $.identifier), seq("&", $.identifier))),
+        field("name", choice($.identifier, $.instance_variable, seq("&", $.identifier))),
         ":",
         field("type", $._type),
         optional(seq("=", $.expression)),
@@ -343,7 +343,7 @@ export default grammar({
         $.yield_expression,
       ),
 
-    instance_variable: ($) => seq("@", $.identifier),
+    instance_variable: ($) => token(seq("@", /[a-zA-Z_][a-zA-Z0-9_]*/)),
 
     boolean_literal: ($) => choice("true", "false"),
 

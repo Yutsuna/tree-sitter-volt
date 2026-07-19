@@ -107,7 +107,7 @@
 
 (symbol_literal) @string.special.symbol
 
-(regex_literal) @string.regex
+(regex) @string.special.regex
 
 (escape_sequence) @escape
 

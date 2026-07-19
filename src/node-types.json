@@ -339,7 +339,7 @@
           "named": true
         },
         {
-          "type": "regex_literal",
+          "type": "regex",
           "named": true
         },
         {
@@ -639,7 +639,7 @@
           "named": true
         },
         {
-          "type": "regex_literal",
+          "type": "regex",
           "named": true
         },
         {
@@ -1811,7 +1811,7 @@
     "named": false
   },
   {
-    "type": "regex_literal",
+    "type": "regex",
     "named": true
   },
   {

@@ -339,7 +339,7 @@ export default grammar({
         $.parenthesized_expression,
         $.array_literal,
         $.hash_literal,
-        $.regex_literal,
+        $.regex,
         $.yield_expression,
       ),
 
@@ -359,7 +359,7 @@ export default grammar({
 
     symbol_literal: ($) => /:[a-z_][a-zA-Z0-9_]*[!?]?=?/,
 
-    regex_literal: ($) =>
+    regex: ($) =>
       token(
         seq(
           "/",

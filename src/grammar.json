@@ -1259,7 +1259,7 @@
         },
         {
           "type": "SYMBOL",
-          "name": "regex_literal"
+          "name": "regex"
         },
         {
           "type": "SYMBOL",
@@ -1351,7 +1351,7 @@
       "type": "PATTERN",
       "value": ":[a-z_][a-zA-Z0-9_]*[!?]?=?"
     },
-    "regex_literal": {
+    "regex": {
       "type": "TOKEN",
       "content": {
         "type": "SEQ",

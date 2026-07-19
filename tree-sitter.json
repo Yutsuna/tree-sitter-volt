@@ -6,11 +6,7 @@
       "camelcase": "Volt",
       "title": "Volt",
       "scope": "source.volt",
-      "file-types": [
-        "vl",
-        "volt",
-        "vlx"
-      ],
+      "file-types": ["vl", "volt", "vlx"],
       "injection-regex": "^volt$",
       "class-name": "TreeSitterVolt",
       "highlights": "queries/highlights.scm",

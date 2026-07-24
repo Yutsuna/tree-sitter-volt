@@ -1,12 +1,17 @@
 ; Scopes
 ;------------------------------------------------------------------------------
 
-((method_definition) @local.scope
+((method_declaration) @local.scope
  (#set! local.scope-inherits false))
 
 [
-  (block)
+  (block_expression)
+  (block_argument)
   (conditional_statement)
+  (class_declaration)
+  (struct_declaration)
+  (module_declaration)
+  (mixin_declaration)
 ] @local.scope
 
 ; Definitions
@@ -16,11 +21,13 @@
   name: (identifier) @local.definition)
 
 (assignment
-  left: (assignment_left_hand_side
-    (identifier) @local.definition))
+  target: (identifier) @local.definition)
 
 (variable_declaration
-  (identifier) @local.definition)
+  name: (identifier) @local.definition)
+
+(field_declaration
+  name: (identifier) @local.definition)
 
 ; References
 ;------------------------------------------------------------------------------

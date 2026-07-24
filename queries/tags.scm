@@ -4,16 +4,7 @@
 (
   (comment)* @doc
   .
-  (method_definition
-    name: (_) @name) @definition.method
-  (#strip! @doc "^#\\s*")
-  (#select-adjacent! @doc @definition.method)
-)
-
-(
-  (comment)* @doc
-  .
-  (abstract_method_definition
+  (method_declaration
     name: (_) @name) @definition.method
   (#strip! @doc "^#\\s*")
   (#select-adjacent! @doc @definition.method)
@@ -25,7 +16,7 @@
 (
   (comment)* @doc
   .
-  (class_definition
+  (class_declaration
     name: (type_identifier) @name) @definition.class
   (#strip! @doc "^#\\s*")
   (#select-adjacent! @doc @definition.class)
@@ -37,7 +28,7 @@
 (
   (comment)* @doc
   .
-  (struct_definition
+  (struct_declaration
     name: (type_identifier) @name) @definition.class
   (#strip! @doc "^#\\s*")
   (#select-adjacent! @doc @definition.class)
@@ -47,7 +38,7 @@
 ;------------------------------------------------------------------------------
 
 (
-  (module_definition
+  (module_declaration
     name: (type_identifier) @name) @definition.module
 )
 
@@ -55,7 +46,7 @@
 ;------------------------------------------------------------------------------
 
 (
-  (mixin_definition
+  (mixin_declaration
     name: (type_identifier) @name) @definition.module
 )
 
@@ -63,8 +54,9 @@
 ;------------------------------------------------------------------------------
 
 (call_expression
-  (member_expression
-    (identifier) @name)) @reference.call
+  callee: (expression
+    (member_expression
+      property: (identifier) @name))) @reference.call
 
 (
   [(identifier) (type_identifier)] @name @reference.call

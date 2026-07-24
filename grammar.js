@@ -29,7 +29,7 @@ const PREC = {
 };
 
 const commaSep = (rule) => seq(rule, repeat(seq(",", rule)));
-const commaSep1 = (rule) => seq(rule, repeat(seq(",", rule)), optional(","));
+const commaSep1 = (rule) => seq(rule, repeat(seq(",", rule)));
 
 export default grammar({
   name: "volt",
@@ -64,7 +64,7 @@ export default grammar({
   ],
 
   rules: {
-    source_file: ($) => repeat(seq(optional($._statement), $._terminator)),
+    source_file: ($) => repeat(choice($._statement, $._terminator)),
 
     _terminator: ($) => choice("\n", ";", "\r\n"),
 
@@ -73,7 +73,7 @@ export default grammar({
 
     // Identifiers & Words
     _identifier_word: ($) => /[a-z_][a-zA-Z0-9_]*/,
-    identifier: ($) => /[a-z_][a-zA-Z0-9_]*[?!]?/,
+    identifier: ($) => /[a-z_][a-zA-Z0-9_]*[!?!]?/,
     type_identifier: ($) => /[A-Z][a-zA-Z0-9_]*/,
     instance_variable: ($) => /@[a-z_][a-zA-Z0-9_]*/,
 
@@ -93,16 +93,19 @@ export default grammar({
     nil_literal: ($) => "nil",
 
     string_literal: ($) =>
-      seq(
-        '"',
-        repeat(
-          choice(
-            /[^"\\#]+/,
-            /\\./,
-            $.macro_interpolation,
+      token(
+        seq(
+          '"',
+          repeat(
+            choice(
+              /[^"\\#]+/,
+              /#+[^{"\\#]/,
+              /\\./,
+              seq("#{", /[^}\n]+/, "}"),
+            ),
           ),
+          '"',
         ),
-        '"',
       ),
 
     char_literal: ($) => /'([^'\\]|\\.)'/,
@@ -252,9 +255,9 @@ export default grammar({
           ),
         ),
         optional(seq("->", field("return_type", $._type))),
-        $._terminator,
         optional(
           seq(
+            $._terminator,
             repeat(seq(optional($._statement), $._terminator)),
             repeat($.rescue_clause),
             optional($.ensure_clause),
@@ -298,7 +301,17 @@ export default grammar({
         "circuit",
         field("name", $.string_literal),
         "{",
-        repeat(seq(optional($._statement), $._terminator)),
+        repeat(
+          seq(
+            choice(
+              $._statement,
+              seq("runtime", $.string_literal),
+              seq("entrypoint", $.string_literal),
+              seq("modules", "(", optional(commaSep(seq($.string_literal, "=>", $.string_literal))), ")"),
+            ),
+            $._terminator,
+          ),
+        ),
         "}",
       ),
 
@@ -353,13 +366,13 @@ export default grammar({
       seq(choice("if", "unless", "until"), field("condition", $.expression)),
 
     return_statement: ($) =>
-      seq("return", optional($.expression), optional($.inline_modifier)),
+      prec.left(seq("return", optional($.expression), optional($.inline_modifier))),
 
     break_statement: ($) =>
-      seq("break", optional($.expression), optional($.inline_modifier)),
+      prec.left(seq("break", optional($.expression), optional($.inline_modifier))),
 
     next_statement: ($) =>
-      seq("next", optional($.expression), optional($.inline_modifier)),
+      prec.left(seq("next", optional($.expression), optional($.inline_modifier))),
 
     conditional_statement: ($) =>
       seq(
@@ -447,7 +460,6 @@ export default grammar({
         $.section_expression,
         $.dot_call_expression,
         $.jsx_element,
-        $.command_call_expression,
       ),
 
     self_expression: ($) => "self",
@@ -474,10 +486,20 @@ export default grammar({
 
     block_argument: ($) =>
       seq(
-        choice("do", "{"),
-        optional(seq("|", commaSep1($.parameter), "|")),
-        repeat(seq(optional($._statement), $._terminator)),
-        choice("end", "}"),
+        choice(
+          seq(
+            "do",
+            optional(seq("|", commaSep1($.parameter), "|")),
+            repeat(seq(choice($._statement, $._terminator))),
+            "end",
+          ),
+          seq(
+            "{",
+            optional(seq("|", commaSep1($.parameter), "|")),
+            repeat(seq(choice($._statement, $._terminator))),
+            "}",
+          ),
+        ),
       ),
 
     binary_expression: ($) =>
@@ -526,7 +548,7 @@ export default grammar({
         seq(
           field("callee", $.expression),
           choice(
-            seq("(", optional(commaSep1(choice($.named_argument, $.expression))), ")"),
+            seq("(", optional(commaSep1(choice($.named_argument, $.expression))), ")", optional($.block_argument)),
             $.block_argument,
           ),
         ),
@@ -581,7 +603,7 @@ export default grammar({
             ),
           ),
         ),
-        optional(seq("else", $._terminator, repeat(seq(optional($._statement), $._terminator)))),
+        optional(seq("else", repeat(seq(choice($._statement, $._terminator))))),
         "end",
       ),
 
@@ -634,15 +656,6 @@ export default grammar({
           ".",
           field("method", choice($.identifier, $.type_identifier)),
           optional(seq("(", optional(commaSep1($.expression)), ")")),
-        ),
-      ),
-
-    command_call_expression: ($) =>
-      prec.left(
-        PREC.ASSIGNMENT,
-        seq(
-          field("callee", choice($.identifier, $.type_identifier, $.member_expression)),
-          commaSep1(choice($.named_argument, $.expression)),
         ),
       ),
 

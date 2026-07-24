@@ -1,0 +1,62 @@
+==================
+Class declaration
+==================
+class Person
+  def initialize(name : String)
+    @name = name
+  end
+end
+
+---
+
+(source_file
+  (class_declaration
+    name: (type_identifier)
+    (method_declaration
+      name: (identifier)
+      (parameter_list
+        (parameter
+          name: (identifier)
+          type: (type_identifier)))
+      (expression_statement
+        (expression
+          (assignment
+            target: (instance_variable)
+            value: (expression
+              (identifier))))))))
+
+==================
+Single line block and String Interpolation
+==================
+def test -> String
+  "count = #{ n } items"
+  items.map do |item| item > 1 end
+end
+
+---
+
+(source_file
+  (method_declaration
+    name: (identifier)
+    return_type: (type_identifier)
+    (expression_statement
+      (expression
+        (string_literal)))
+    (expression_statement
+      (expression
+        (call_expression
+          callee: (expression
+            (member_expression
+              object: (expression
+                (identifier))
+              property: (identifier)))
+          (block_argument
+            (parameter
+              name: (identifier))
+            (expression_statement
+              (expression
+                (binary_expression
+                  (expression
+                    (identifier))
+                  (expression
+                    (integer_literal)))))))))))

@@ -8,16 +8,19 @@
 
 (type_identifier) @type
 
-(class_definition
+(class_declaration
   name: (type_identifier) @type)
 
-(struct_definition
+(struct_declaration
   name: (type_identifier) @type)
 
-(module_definition
+(module_declaration
   name: (type_identifier) @type)
 
-(mixin_definition
+(mixin_declaration
+  name: (type_identifier) @type)
+
+(enum_declaration
   name: (type_identifier) @type)
 
 ; Keywords
@@ -32,6 +35,7 @@
   "else"
   "elsif"
   "end"
+  "enum"
   "getter"
   "if"
   "include"
@@ -39,45 +43,43 @@
   "module"
   "of"
   "or"
+  "property"
   "raise"
+  "rescue"
+  "ensure"
   "return"
   "sizeof"
   "struct"
-  "typeof"
+  "circuit"
+  "component"
+  "macro"
   "unless"
+  "until"
   "while"
-  "yield"
+  "for"
+  "in"
+  "case"
+  "when"
+  "then"
 ] @keyword
-
-((identifier) @keyword
- (#match? @keyword "^(private|protected|public)$"))
-
-(visibility_modifier) @keyword
 
 ; Function calls
 ;------------------------------------------------------------------------------
 
 (call_expression
-  (member_expression
-    (identifier) @function.method))
+  callee: (expression
+    (member_expression
+      property: (identifier) @function.method)))
 
 (call_expression
-  (identifier) @function)
+  callee: (expression
+    (identifier) @function))
 
 ; Function definitions
 ;------------------------------------------------------------------------------
 
-(method_definition
+(method_declaration
   name: (identifier) @function)
-
-(method_definition
-  name: (operator_identifier) @function)
-
-(abstract_method_definition
-  name: (identifier) @function)
-
-(abstract_method_definition
-  name: (operator_identifier) @function)
 
 ; Variables & Instance variables
 ;------------------------------------------------------------------------------
@@ -89,37 +91,28 @@
 (parameter
   name: (identifier) @variable.parameter)
 
-; Member declarations
+; Member / Field declarations
 ;------------------------------------------------------------------------------
 
-(member_declaration
+(field_declaration
   name: (identifier) @property)
 
 ; Literals
 ;------------------------------------------------------------------------------
 
-[
-  (string)
-] @string
-
-(string_content) @string
+(string_literal) @string
 
 (symbol_literal) @string.special.symbol
 
-(regex) @string.special.regex
+(char_literal) @character
 
-(escape_sequence) @escape
-
-(number) @number
+(integer_literal) @number
+(float_literal) @number
 
 [
   (nil_literal)
   (boolean_literal)
 ] @constant.builtin
-
-(interpolation
-  "#{" @punctuation.special
-  "}" @punctuation.special) @embedded
 
 (comment) @comment
 (doc_comment) @comment
@@ -129,7 +122,6 @@
 
 (annotation
   "@[" @punctuation.special
-  (type_identifier) @attribute
   "]" @punctuation.special)
 
 ; Operators
@@ -142,7 +134,6 @@
   "/"
   "%"
   "**"
-  "//"
   "=="
   "!="
   "<"
@@ -161,9 +152,9 @@
   "^"
   "~"
   "->"
+  "|>"
+  "<|"
 ] @operator
-
-(assignment_operator) @operator
 
 ; Punctuation
 ;------------------------------------------------------------------------------

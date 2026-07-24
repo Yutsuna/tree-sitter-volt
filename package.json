@@ -52,6 +52,7 @@
     "install": "node-gyp-build",
     "prestart": "tree-sitter build --wasm",
     "start": "tree-sitter playground",
+    "parse": "tree-sitter generate && tree-sitter parse samples/**/*.vl",
     "test": "node --test bindings/node/*_test.js"
   },
   "allowScripts": {

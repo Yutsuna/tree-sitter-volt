@@ -4461,6 +4461,10 @@
     "named": false
   },
   {
+    "type": "setter",
+    "named": false
+  },
+  {
     "type": "sizeof",
     "named": false
   },

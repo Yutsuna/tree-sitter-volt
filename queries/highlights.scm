@@ -37,6 +37,7 @@
   "end"
   "enum"
   "getter"
+  "setter"
   "if"
   "include"
   "mixin"

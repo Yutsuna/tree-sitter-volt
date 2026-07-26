@@ -268,7 +268,7 @@ export default grammar({
 
     field_declaration: ($) =>
       seq(
-        optional(choice("getter", "property")),
+        optional(choice("getter", "property", "setter")),
         field("name", $.identifier),
         optional(seq(":", field("type", $._type))),
         optional(seq("=", field("value", $.expression))),

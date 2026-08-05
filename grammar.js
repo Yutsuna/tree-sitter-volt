@@ -34,7 +34,7 @@ const commaSep1 = (rule) => seq(rule, repeat(seq(",", rule)));
 export default grammar({
   name: "volt",
 
-  extras: ($) => [/[ \t]+/, $.comment, $.doc_comment],
+  extras: ($) => [/[ \t]+/, $.comment, $.block_comment, $.doc_comment],
 
   conflicts: ($) => [
     [$._simple_expression, $.enum_variant_pattern],
@@ -45,7 +45,6 @@ export default grammar({
     [$._type, $.qualified_type],
     [$.enum_entry, $._simple_expression],
     [$.field_declaration, $._simple_expression],
-    [$.variable_declaration, $._simple_expression],
     [$.field_declaration, $.variable_declaration],
     [$.section_expression],
     [$.parameter, $._simple_expression],
@@ -56,10 +55,6 @@ export default grammar({
     [$.generic_type, $._simple_expression],
     [$._type, $.self_expression],
     [$._type, $.parameter, $._simple_expression],
-    [$._simple_expression, $.named_argument],
-    [$.enum_entry, $.parenthesized_expression],
-    [$.parameter_list, $.parenthesized_expression],
-    [$._type, $.jsx_element],
     [$.case_expression],
   ],
 
@@ -69,6 +64,7 @@ export default grammar({
     _terminator: ($) => choice("\n", ";", "\r\n"),
 
     comment: ($) => /#[^\n]*/,
+    block_comment: ($) => token(seq("#{", repeat(choice(/[^#]/, seq("#", /[^}]/))), "#}")),
     doc_comment: ($) => /##.*/,
 
     // Identifiers & Words

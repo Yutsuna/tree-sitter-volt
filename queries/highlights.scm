@@ -28,6 +28,7 @@
 
 [
   "abstract"
+  "external"
   "and"
   "class"
   "def"
@@ -116,6 +117,7 @@
 ] @constant.builtin
 
 (comment) @comment
+(block_comment) @comment
 (doc_comment) @comment
 
 ; Annotations

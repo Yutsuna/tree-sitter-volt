@@ -1,3 +1,0 @@
-mixin Hashable
-  abstract def hash -> UInt64
-end

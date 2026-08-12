@@ -29,7 +29,6 @@
 [
   "abstract"
   "external"
-  "and"
   "class"
   "def"
   "do"
@@ -44,7 +43,6 @@
   "mixin"
   "module"
   "of"
-  "or"
   "property"
   "raise"
   "rescue"
@@ -163,7 +161,26 @@
   "->"
   "|>"
   "<|"
+  "not"
+  "and"
+  "or"
 ] @operator
+
+(assignment
+  [
+    "="
+    "+="
+    "-="
+    "*="
+    "/="
+    "%="
+    "**="
+    "&="
+    "|="
+    "^="
+    "<<="
+    ">>="
+  ] @operator)
 
 ; Punctuation
 ;------------------------------------------------------------------------------

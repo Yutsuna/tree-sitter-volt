@@ -628,12 +628,6 @@ export default grammar({
 
     raise_expression: ($) => prec.left(seq("raise", optional($.expression))),
 
-    //sizeof_expression: ($) => seq("sizeof", "(", $._type, ")"),
-    // "sizeof"
-    // "trivially_destructible?"
-    // "trivially_copyable?"
-    // all of these are compile-time expressions, so they should be parsed as a special kind of expression
-    // they all follow the same rule: seq( <expr>, ( type ))
     compile_time_expression: ($) =>
       prec.left(
         PREC.POSTFIX,

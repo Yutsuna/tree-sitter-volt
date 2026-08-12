@@ -633,9 +633,10 @@ export default grammar({
         PREC.POSTFIX,
         seq(
           choice("sizeof", "trivially_destructible?", "trivially_copyable?"),
-          "(",
-          $._type,
-          ")",
+          choice(
+            seq("(", $._type, ")"),
+            $._type,
+          ),
         ),
       ),
 

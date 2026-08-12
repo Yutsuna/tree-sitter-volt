@@ -1,0 +1,71 @@
+# Everything an iterable gets for free once it can say how to visit its
+# elements. `T` is the element type, carried through the `include` — an
+# `Array<T>` includes `Enumerable<T>`, so `map` on it really does yield an
+# `Array` of whatever the block returns.
+
+mixin Enumerable<T>
+  abstract def each( &block : T -> Void ) -> Void
+
+  def map<U>( &block : T -> U ) -> Array<U>
+    result = Array<U>.new
+    each do | item |
+      result.push( block.call( item ) )
+    end
+    result
+  end
+
+  def filter( &block : T -> Bool ) -> Array<T>
+    result = Array<T>.new
+    each do | item |
+      if block.call( item )
+        result.push( item )
+      end
+    end
+    result
+  end
+
+  def to_array -> Array<T>
+    result = Array<T>.new
+    each do | item |
+      result.push( item )
+    end
+    result
+  end
+
+  def count -> UInt64
+    total = 0_u64
+    each { | _ | total += 1 }
+    total
+  end
+
+  def any?( &block : T -> Bool ) -> Bool
+    found = false
+    each do | item |
+      if block.call( item )
+        found = true
+        break
+      end
+    end
+    found
+  end
+
+  def all?( &block : T -> Bool ) -> Bool
+    ok = true
+    each do | item |
+      if not block.call( item )
+        ok = false
+        break
+      end
+    end
+    ok
+  end
+
+  def each_with_index( &block : ( T, UInt64 ) -> Void ) -> Void
+    idx = 0_u64
+    each do | item |
+      block.call( item, idx )
+      idx += 1
+    end
+  end
+end
+

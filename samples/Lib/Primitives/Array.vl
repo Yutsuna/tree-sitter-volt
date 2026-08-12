@@ -1,0 +1,97 @@
+@[Literal( ArrayLit )]
+struct Array<T>
+  include Enumerable<T>
+
+  getter buffer : Pointer<T>
+  getter size : UInt64
+  getter capacity : UInt64
+
+  def initialize( initial_capacity : UInt64 = 8 )
+    @size = 0
+    @capacity = initial_capacity
+    @buffer = Pointer<T>.malloc( @capacity )
+  end
+
+  # An array owns its elements, so destroying it destroys them first — the
+  # same body `std::vector::~vector` has, and for the same reason.
+  #
+  # It is written here, in Volt, rather than synthesized by the compiler: the
+  # middle-end injects `finalize` at region exits and knows nothing else — not
+  # what a sequence is, not that `size` and `[]` exist. `finalize` resolves on
+  # any `T` at all because every type has one, defaulted to empty when the
+  # source does not write it, exactly as C++ gives every class a destructor.
+  #
+  # And the loop costs nothing for a `T` that has nothing to destroy:
+  # `trivially_destructible?` is a compile-time predicate, so the guard folds
+  # to a constant at instantiation and the whole loop disappears — which is
+  # precisely what `is_trivially_destructible_v<T>` buys `_Destroy`.
+  def finalize -> Void
+    if not trivially_destructible? T
+      i = 0_u64
+      while i < @size
+        ( *( @buffer + i ) ).finalize
+        i += 1
+      end
+    end
+    @buffer.free
+  end
+
+  def empty? -> Bool
+    @size == 0
+  end
+
+  def []( index : UInt64 ) -> T
+    *( @buffer + index )
+  end
+
+  def []=( index : UInt64, value : T ) -> Void
+    *( @buffer + index ) = value
+  end
+
+  def push( value : T ) -> Void
+    if @size >= @capacity
+      new_cap = @capacity == 0 ? 8 : @capacity * 2
+      new_buf = Pointer<T>.malloc( new_cap )
+      i = 0_u64
+      while i < @size
+        *( new_buf + i ) = *( @buffer + i )
+        i += 1
+      end
+      @buffer.free
+      @buffer = new_buf
+      @capacity = new_cap
+    end
+
+    *( @buffer + @size ) = value
+    @size += 1
+  end
+
+  # The append operator an `[ a, b, c ]` literal lowers to (LowerArrayLit,
+  # TypeChecker) — resolved through ordinary member resolution like any
+  # other `<<`, not a builtin: a type claiming `@[Literal( ArrayLit )]`
+  # without this declared would fail the lowering exactly as `Int32 + Int32`
+  # fails without `Arithmetic`.
+  def <<( value : T ) -> self
+    push( value )
+    self
+  end
+
+  def pop -> T
+    if @size > 0
+      @size -= 1
+      *( @buffer + @size )
+    end
+  end
+
+  def each( &block : T -> Void ) -> Void
+    i = 0_u64
+    while i < @size
+      block.call( *( @buffer + i ) )
+      i += 1
+    end
+  end
+
+  def clear -> Void
+    @size = 0
+  end
+end

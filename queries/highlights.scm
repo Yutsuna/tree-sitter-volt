@@ -51,6 +51,8 @@
   "ensure"
   "return"
   "sizeof"
+  "trivially_destructible?"
+  "trivially_copyable?"
   "struct"
   "circuit"
   "component"

@@ -1,0 +1,96 @@
+@[Primitive( "u8", 8 )]
+struct UInt8
+  include Comparable
+  include Hashable
+  include Arithmetic
+  include Stringable
+
+  def <=>( other : UInt8 ) -> Int32
+    if self < other
+      -1
+    elsif self > other
+      1
+    else
+      0
+    end
+  end
+
+  def hash -> UInt64
+    self
+  end
+end
+
+
+@[Primitive( "u16", 16 )]
+struct UInt16
+  include Comparable
+  include Hashable
+  include Arithmetic
+  include Stringable
+
+  def <=>( other : UInt16 ) -> Int32
+    if self < other
+      -1
+    elsif self > other
+      1
+    else
+      0
+    end
+  end
+
+  def hash -> UInt64
+    self
+  end
+end
+
+
+@[Primitive( "u32", 32 )]
+struct UInt32
+  include Comparable
+  include Hashable
+  include Arithmetic
+  include Stringable
+
+  def <=>( other : UInt32 ) -> Int32
+    if self < other
+      -1
+    elsif self > other
+      1
+    else
+      0
+    end
+  end
+
+  def hash -> UInt64
+    h = self
+    h ^= ( h << 13 )
+    h ^= ( h >> 7 )
+    h ^ ( h << 17 )
+  end
+end
+
+
+@[Primitive( "u64", 64 )]
+struct UInt64
+  include Comparable
+  include Hashable
+  include Arithmetic
+  include Stringable
+
+  def <=>( other : UInt64 ) -> Int32
+    if self < other
+      -1
+    elsif self > other
+      1
+    else
+      0
+    end
+  end
+
+  def hash -> UInt64
+    h = self
+    h ^= ( h << 13 )
+    h ^= ( h >> 7 )
+    h ^ ( h << 17 )
+  end
+end

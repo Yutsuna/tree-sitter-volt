@@ -1,0 +1,35 @@
+mixin Comparable
+  abstract def <=>( other : self ) -> Int32
+
+  def ==( other : self ) -> Bool
+    ( self <=> other ) == 0
+  end
+
+  def ===( other : self ) -> Bool
+    self == other
+  end
+
+  def !=( other : self ) -> Bool
+    ( self <=> other ) != 0
+  end
+
+  def <( other : self ) -> Bool
+    ( self <=> other ) < 0
+  end
+
+  def <=( other : self ) -> Bool
+    ( self <=> other ) <= 0
+  end
+
+  def >( other : self ) -> Bool
+    ( self <=> other ) > 0
+  end
+
+  def >=( other : self ) -> Bool
+    ( self <=> other ) >= 0
+  end
+
+  def ..( other : self ) -> Range<self>
+    Range<self>.new( self, other )
+  end
+end

@@ -1,0 +1,19 @@
+@[Primitive( "u64", 64 ), Literal( SymbolLiteral )]
+struct Symbol
+  include Comparable
+  include Hashable
+
+  def <=>( other : Symbol ) -> Int32
+    if self < other
+      -1
+    elsif self > other
+      1
+    else
+      0
+    end
+  end
+
+  def hash -> UInt64
+    self
+  end
+end

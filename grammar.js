@@ -452,7 +452,8 @@ export default grammar({
         $.case_expression,
         $.begin_expression,
         $.raise_expression,
-        $.sizeof_expression,
+        // $.sizeof_expression,
+        $.compile_time_expression,
         $.section_expression,
         $.dot_call_expression,
         $.jsx_element,
@@ -627,7 +628,23 @@ export default grammar({
 
     raise_expression: ($) => prec.left(seq("raise", optional($.expression))),
 
-    sizeof_expression: ($) => seq("sizeof", "(", $._type, ")"),
+    //sizeof_expression: ($) => seq("sizeof", "(", $._type, ")"),
+    // "sizeof"
+    // "trivially_destructible?"
+    // "trivially_copyable?"
+    // all of these are compile-time expressions, so they should be parsed as a special kind of expression
+    // they all follow the same rule: seq( <expr>, ( type ))
+    compile_time_expression: ($) =>
+      prec.left(
+        PREC.POSTFIX,
+        seq(
+          choice("sizeof", "trivially_destructible?", "trivially_copyable?"),
+          "(",
+          $._type,
+          ")",
+        ),
+      ),
+
 
     section_expression: ($) =>
       choice(

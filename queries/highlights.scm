@@ -50,7 +50,6 @@
   "rescue"
   "ensure"
   "return"
-  "compile_time_expression"
   "struct"
   "circuit"
   "component"
@@ -64,6 +63,13 @@
   "when"
   "then"
 ] @keyword
+
+(compile_time_expression
+  [
+    "sizeof"
+    "trivially_destructible?"
+    "trivially_copyable?"
+  ] @keyword)
 
 ; Function calls
 ;------------------------------------------------------------------------------
